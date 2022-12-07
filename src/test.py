@@ -94,4 +94,28 @@ def getShortDesc():
 
 
 
+#Extract the short description
+@app.route("/testRulesetShortDescription")
+def getShortDescExists():
+  #Get the data from the endpoint
+    x = requests.get("https://es.wikipedia.org/w/api.php?action=query&prop=revisions&titles=Yoshua_Bengio&rvlimit=1&formatversion=2&format=json&rvprop=content")
+    result = str(x.status_code)
+    
+    #Grab the json
+    jsonExtract = x.json()
+
+    #grab the content from the page id
+    pageTitle = jsonExtract['query']['pages'][0]['title']
+
+    content = jsonExtract['query']['pages'][0]['revisions'][0]['content']
+
+    exists = content.find('Short description')
+
+    if (exists > -1 ):
+        return 'The string exists'
+
+    else:
+        return 'Nothing here'
+
+
 

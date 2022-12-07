@@ -1,6 +1,8 @@
 from flask import Flask
+from wikiRulesUtils.core import wikiRules
 import requests
 import json
+
 
 
 app = Flask(__name__)
@@ -24,22 +26,21 @@ def extractDescription( title:str, countryCode:str, descriptor:str ):
 
     jsonExtract = x.json()
 
-    print (type(jsonExtract))
-    #Run our rules
-
-    #Check to make sure the ShortDescription is there
-
-
-    #Check to make sure the Article is there
-
-
-    #grab the content from the page id
-    content = jsonExtract['query']['pages'][0]['revisions'][0]['content']
 
     #Clean up the Short Description
     DescriptorSanitized = descriptor.replace('_', ' ')
     finalDescriptor = "{{"+ DescriptorSanitized +"|"
+    print (DescriptorSanitized)
 
+    #grab the content from the page id
+    content = jsonExtract['query']['pages'][0]['revisions'][0]['content']
+
+    #Run our rules
+    shortDescriptionCheck = wikiRules.ruleDescriptorSeach(DescriptorSanitized, content)
+
+    #Check to make sure the ShortDescription is there
+    if(shortDescriptionCheck == False):
+        return 'That descriptor doesn\'t exist with this current combination; Check your Country Code or Article Spelling'
 
     #grab the location of the short description
     findFirstOccurance = content.find("}}")
@@ -49,15 +50,3 @@ def extractDescription( title:str, countryCode:str, descriptor:str ):
     shortDescSanitized = finalString.replace('|','')
 
     return shortDescSanitized 
-
-
-
-
-
-    def ruleArticleIsMissing(inputJsonObj:dict):
-        return 0
-
-    def ruleNoShortDescription():
-        return 0
-
-    
