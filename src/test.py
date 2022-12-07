@@ -1,7 +1,7 @@
 from flask import Flask
 import requests
 import json
-import re
+
 
 #This is just a set of test end points so I can validate things look good and that the install looks correct.
 
