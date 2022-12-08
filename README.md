@@ -47,9 +47,25 @@ Open your browser and simply type in the following to your address bar : ``` htt
     - ***Sample response*** :  That descriptor doesn't exist with this current combination; Check your Country Code or Article Spelling
 <br /><br /> <br />
 ## Hypothetical Future State: <br />
-- High Availability: In order to make this highly available in a completely open-source environment with your own home-grown systems there's a few options that you could attach this to.
-    - Public Cloud (i.e. AWS)
-    - On Prem (Your own private Datacenter with Kubernetes (K8))
+There’s a few items related to reliability that could cause an API to not be available. In cloud-native applications this is usually solved by using some sort of Gateway. For example, AWS has API Gateway for this purpose. It allows for things like authorization and scaling with load automatically. That being said, it is only available in the context of AWS, for example. There are other cloud platforms with similar technologies. How can we solve for this in an open-source setting where transparency is important? We first have to consider some scenarios that we need to solve for and technologies that we can use overcome this issue. 
+
+### Potential challenges to  availability and reliability:
+
+- Security breaches/authorization issues
+-  The API becomes flooded with traffic (intentionally or unintentionally)
+-  The Server that it’s running on goes down or becomes unreliable
+-  The service that the API calls becomes slow or unavailable
+- Users in different parts of the world have issues connecting to it
+
+
+
+### Potential Solutions:
+
+-  Security breaches/authorization issues: This API currently lacks authorization. In a potential future version it would make sense to have authorization either implemented here or in an API Gateway type setup that enforces HTTPS with custom SSL. Additionally, it might make sense to have some sort of Web application and API protection firewall paired with a Web application firewall that would inspect the traffic and look for patterns in access. Together with some code changes and infrastructure changes we could protect the endpoints.
+-  The API becomes flooded with traffic (intentionally or unintentionally): This is highly related to the first point. A mechanism with an API Gateway paired with a Web Application Firewall should help alleviate some of these issues. Also, this is where proper design of the infrastructure comes in place. A load balancer should also be looked at to validate that all of the legitimate  traffic coming in is routed to the right place. There are various schemes that could followed (Weighted, geolocation based, manually done (not ideal), Done on a schedule, etc.). Based on the anticipated use, the team would have to decide a scheme; Maybe even adopting a hybrid approach that is dynamic and based on usage or other factors. There’s different ways to attack this problem but it should be considered in any deployment.
+-  The Server that it’s running on goes down or becomes unreliable: Instead of running this on one server, I would run a K8 cluster with auto-scaling options in enabled spread across different regions with Load balancers in front of them. If possible I would even consider edge locations as well to see if this makes sense based on where my users are. Wrapped up in docker and deployed on K8 there are a few options for scaling HPA and VPA. Horizontal Pod Autoscaler is more or less the software approach to managing the pods and you can write it to look at various factors. Vertical Pod Autoscaler looks at the hardware utilization and scales as needed but this requires the pod to be restarted which would mean some downtime depending on how many pods you have. With redundancy built in, these can be orchestrated.
+-  The service that the API calls becomes slow or unavailable: I would primarily attack this issue with caching. Caching responses locally for the most used API endpoints. It might make sense to cache responses pretty often throughout the day if you expect the data to change frequently; especially in the case of a very busy endpoint or topic/
+-  Users in different parts of the world have issues connecting to it: I would look at implementing edge locations in different regions around the world. Bringing the data closer to your users would decrease on latency and ease the access to different people. 
 
 
 
